@@ -1,28 +1,108 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import {
+  Grid,
+  Paper,
+  TextField,
+  makeStyles,
+  Button,
+  CircularProgress,
+} from '@material-ui/core';
+import { useForm } from 'react-hook-form';
+
 import './App.css';
 
-interface AppProps {}
+const useStyles = makeStyles((theme) => ({
+  card: {
+    padding: theme.spacing(3),
+    minHeight: '50vh',
+  },
+  button: {
+    height: '100%',
+  },
+}));
 
-function App({}: AppProps) {
+type GithubResponseType = {
+  total_count: number;
+  items: GithubIssueType[];
+  incomplete_result: boolean;
+};
+
+type GithubIssueType = {
+  url: string;
+  repository_url: string;
+  title: string;
+  labels: string;
+};
+
+const App = () => {
+  const classes = useStyles();
+  const { handleSubmit, register } = useForm();
+  const [results, setResults] = useState<GithubIssueType[]>([]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+
+  useEffect(() => {
+    const searchGithub = async (searchString: string) => {
+      try {
+        setIsFetching(true);
+        const data = await fetch(
+          `https://api.github.com/search/issues?q=${searchString}`,
+        );
+
+        if (data.ok) {
+          const json = await data.json();
+          console.log(json);
+          setResults(json.items);
+        }
+      } catch (err) {
+      } finally {
+        setIsFetching(false);
+      }
+      setIsFetching(false);
+    };
+
+    if (isFetching) {
+      searchGithub(register.name);
+    }
+  }, [isFetching]);
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <Grid container justify="center">
+          <Paper className={classes.card}>
+            <form
+              noValidate
+              onSubmit={handleSubmit((data) => setIsFetching(true))}
+            >
+              <Grid container>
+                <Grid item xs={8}>
+                  <TextField
+                    inputRef={register}
+                    required
+                    name="search"
+                    variant="outlined"
+                    label="Search GitHub"
+                  ></TextField>
+                </Grid>
+                <Grid item xs={4}>
+                  <Button
+                    type="submit"
+                    variant="outlined"
+                    className={classes.button}
+                  >
+                    Submit
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+            <Grid container>
+              {isFetching ? <CircularProgress size="large" /> : null}
+            </Grid>
+          </Paper>
+        </Grid>
       </header>
     </div>
   );
-}
+};
 
 export default App;

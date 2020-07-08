@@ -7,8 +7,10 @@
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
     "react": "^16.13.0",
-    "react-dom": "^16.13.0"
+    "react-dom": "^16.13.0",
+    "react-hook-form": "^6.0.1"
   },
   "devDependencies": {
     "@snowpack/app-scripts-react": "^1.4.0",
@@ -17,7 +19,7 @@
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "jest": "^25.4.0",
-    "prettier": "^2.0.0",
+    "prettier": "^2.0.5",
     "snowpack": "^2.5.0",
     "typescript": "^3.8.0"
   }
