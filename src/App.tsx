@@ -7,14 +7,12 @@ import {
   Button,
   CircularProgress,
   Typography,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
 } from '@material-ui/core';
 import { useForm } from 'react-hook-form';
+import MaterialTable from 'material-table';
 import GitHubButton from 'react-github-btn';
+
+import { tableIcons } from './table';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -145,30 +143,31 @@ const App = () => {
                 <>
                   {results.length > 0 ? (
                     <Grid item xs={12}>
-                      <Table>
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Title</TableCell>
-                            <TableCell>Url</TableCell>
-                            <TableCell>Repository URL</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {results.map((item) => (
-                            <TableRow>
-                              <TableCell>{item.title}</TableCell>
-                              <TableCell>
-                                <a href={item.html_url}>{item.html_url}</a>
-                              </TableCell>
-                              <TableCell>
-                                <a href={item.repository_url}>
-                                  {item.repository_url}
-                                </a>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                      <MaterialTable
+                        title={''}
+                        options={{
+                          padding: 'dense',
+                          rowStyle: {
+                            fontSize: '14px',
+                          },
+                        }}
+                        icons={tableIcons}
+                        columns={[
+                          {
+                            title: 'Title',
+                            field: 'title',
+                          },
+                          {
+                            title: 'URL',
+                            field: 'html_url',
+                          },
+                          {
+                            title: 'Repository Url',
+                            field: 'repository_url',
+                          },
+                        ]}
+                        data={results}
+                      />
                     </Grid>
                   ) : (
                     'No Results'
