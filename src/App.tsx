@@ -13,16 +13,17 @@ import {
   TableRow,
   TableCell,
 } from '@material-ui/core';
-import GitHubButton from 'react-github-btn';
-
 import { useForm } from 'react-hook-form';
+import GitHubButton from 'react-github-btn';
 
 const useStyles = makeStyles((theme) => ({
   card: {
     padding: theme.spacing(3),
     minHeight: '50vh',
+    minWidth: '20%',
   },
   button: {
+    marginLeft: theme.spacing(1),
     height: '100%',
   },
   app: {
@@ -52,6 +53,7 @@ type GithubResponseType = {
 type GithubIssueType = {
   url: string;
   repository_url: string;
+  html_url: string;
   title: string;
   labels: string;
 };
@@ -66,7 +68,7 @@ const App = () => {
     setIsFetching(true);
     try {
       const data = await fetch(
-        `https://api.github.com/search/issues?q=${searchString}`,
+        `https://api.github.com/search/issues?q=${searchString}+label:"good first issue"+is:"open"`,
       );
 
       if (data.ok) {
@@ -123,6 +125,7 @@ const App = () => {
                     required
                     name="search"
                     variant="outlined"
+                    size="small"
                     label="Search GitHub"
                   ></TextField>
                   <Button
@@ -136,30 +139,41 @@ const App = () => {
               </Grid>
             </form>
             <Grid container>
-              {isFetching && <CircularProgress />}
-              {results.length > 0 ? (
-                <Grid item xs={12}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Title</TableCell>
-                        <TableCell>Url</TableCell>
-                        <TableCell>Repository URL</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {results.map((item) => (
-                        <TableRow>
-                          <TableCell>{item.title}</TableCell>
-                          <TableCell>{item.url}</TableCell>
-                          <TableCell>{item.repository_url}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Grid>
+              {isFetching ? (
+                <CircularProgress />
               ) : (
-                'No Results'
+                <>
+                  {results.length > 0 ? (
+                    <Grid item xs={12}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Title</TableCell>
+                            <TableCell>Url</TableCell>
+                            <TableCell>Repository URL</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {results.map((item) => (
+                            <TableRow>
+                              <TableCell>{item.title}</TableCell>
+                              <TableCell>
+                                <a href={item.html_url}>{item.html_url}</a>
+                              </TableCell>
+                              <TableCell>
+                                <a href={item.repository_url}>
+                                  {item.repository_url}
+                                </a>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </Grid>
+                  ) : (
+                    'No Results'
+                  )}
+                </>
               )}
             </Grid>
           </Paper>
