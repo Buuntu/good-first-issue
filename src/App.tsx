@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   Paper,
@@ -6,10 +6,16 @@ import {
   makeStyles,
   Button,
   CircularProgress,
+  Typography,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
 } from '@material-ui/core';
-import { useForm } from 'react-hook-form';
+import GitHubButton from 'react-github-btn';
 
-import './App.css';
+import { useForm } from 'react-hook-form';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -18,6 +24,22 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     height: '100%',
+  },
+  app: {
+    backgroundColor: '#282c34',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    fontSize: 'calc(10px + 2vmin)',
+    color: 'white',
+  },
+  header: {
+    fontFamily: 'Helvetica, Arial, Sans-Serif',
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(10),
+    backgroundColor: '#9400D3',
+    width: '480px',
+    borderRadius: '40px',
   },
 }));
 
@@ -36,44 +58,66 @@ type GithubIssueType = {
 
 const App = () => {
   const classes = useStyles();
-  const { handleSubmit, register, getValues } = useForm();
+  const { handleSubmit, register } = useForm();
   const [results, setResults] = useState<GithubIssueType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
-  useEffect(() => {
-    const searchGithub = async (searchString: string) => {
-      try {
-        const data = await fetch(
-          `https://api.github.com/search/issues?q=${searchString}`,
-        );
+  const searchGithub = async (searchString: string) => {
+    setIsFetching(true);
+    try {
+      const data = await fetch(
+        `https://api.github.com/search/issues?q=${searchString}`,
+      );
 
-        if (data.ok) {
-          const json = await data.json();
-          console.log(json);
-          setResults(json.items);
-        }
-      } catch (err) {
-      } finally {
-        setIsFetching(false);
+      if (data.ok) {
+        const json = await data.json();
+        console.log(json);
+        setResults(json.items);
       }
-    };
-
-    if (isFetching && getValues('search')) {
-      searchGithub(getValues('search'));
+    } catch (err) {
+    } finally {
+      setIsFetching(false);
     }
-  }, [isFetching]);
+  };
 
   return (
     <div className="App">
-      <header className="App-header">
-        <Grid container justify="center">
+      <header className={classes.app}>
+        <Grid container justify="center" alignItems="center">
+          <Grid
+            container
+            justify="center"
+            alignItems="center"
+            direction="column"
+          >
+            <Grid item xs={12} alignContent="center">
+              <Typography
+                className={classes.header}
+                variant="h2"
+                align="center"
+              >
+                good first issue
+              </Typography>
+            </Grid>
+            <Grid item xs={12} alignContent="center">
+              <GitHubButton
+                href="https://github.com/Buuntu/good-first-issue"
+                data-color-scheme="no-preference: light; light: light; dark: dark;"
+                data-size="large"
+                data-show-count
+                aria-label="Star Buuntu/good-first-issue on GitHub"
+              >
+                Star
+              </GitHubButton>
+            </Grid>
+          </Grid>
           <Paper className={classes.card}>
             <form
               noValidate
-              onSubmit={handleSubmit((data) => setIsFetching(true))}
+              onSubmit={handleSubmit((data) => searchGithub(data.search))}
             >
               <Grid container>
-                <Grid item xs={8}>
+                <Grid item xs={12}>
                   <TextField
                     inputRef={register}
                     required
@@ -81,8 +125,6 @@ const App = () => {
                     variant="outlined"
                     label="Search GitHub"
                   ></TextField>
-                </Grid>
-                <Grid item xs={4}>
                   <Button
                     type="submit"
                     variant="outlined"
@@ -93,7 +135,33 @@ const App = () => {
                 </Grid>
               </Grid>
             </form>
-            <Grid container>{isFetching ? <CircularProgress /> : null}</Grid>
+            <Grid container>
+              {isFetching && <CircularProgress />}
+              {results.length > 0 ? (
+                <Grid item xs={12}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Title</TableCell>
+                        <TableCell>Url</TableCell>
+                        <TableCell>Repository URL</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {results.map((item) => (
+                        <TableRow>
+                          <TableCell>{item.title}</TableCell>
+                          <TableCell>{item.url}</TableCell>
+                          <TableCell>{item.repository_url}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Grid>
+              ) : (
+                'No Results'
+              )}
+            </Grid>
           </Paper>
         </Grid>
       </header>
