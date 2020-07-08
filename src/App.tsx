@@ -36,14 +36,13 @@ type GithubIssueType = {
 
 const App = () => {
   const classes = useStyles();
-  const { handleSubmit, register } = useForm();
+  const { handleSubmit, register, getValues } = useForm();
   const [results, setResults] = useState<GithubIssueType[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   useEffect(() => {
     const searchGithub = async (searchString: string) => {
       try {
-        setIsFetching(true);
         const data = await fetch(
           `https://api.github.com/search/issues?q=${searchString}`,
         );
@@ -57,11 +56,10 @@ const App = () => {
       } finally {
         setIsFetching(false);
       }
-      setIsFetching(false);
     };
 
-    if (isFetching) {
-      searchGithub(register.name);
+    if (isFetching && getValues('search')) {
+      searchGithub(getValues('search'));
     }
   }, [isFetching]);
 
@@ -95,9 +93,7 @@ const App = () => {
                 </Grid>
               </Grid>
             </form>
-            <Grid container>
-              {isFetching ? <CircularProgress size="large" /> : null}
-            </Grid>
+            <Grid container>{isFetching ? <CircularProgress /> : null}</Grid>
           </Paper>
         </Grid>
       </header>
